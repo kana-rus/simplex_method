@@ -1,0 +1,5 @@
+[package]
+name          = "simplex_method"
+version       = "0.1.0"
+edition       = "2021"
+authors       = ["kanarus <kanarus786@gmail.com>"]
