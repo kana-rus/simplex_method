@@ -1,10 +1,10 @@
 mod variable;
-mod scalor;
 
-pub use variable::{var, new_slack, Variable};
-pub use scalor  ::{Scalor};
+pub use variable::{new_slack, Variable};
+use crate::Scalor;
 
 
+#[derive(Debug, PartialEq)]
 pub struct Expression {
     pub terms: Vec<(Scalor, Variable)>,
 } impl Expression {
@@ -13,4 +13,10 @@ pub struct Expression {
             .map(|(i, var)| (i.into(), var))
             .collect() }
     }
-}
+} const _: () = {
+    impl From<(Scalor, Variable)> for Expression {
+        fn from(value: (Scalor, Variable)) -> Self {
+            Self { terms: vec![value] }
+        }
+    }
+};

@@ -5,7 +5,7 @@ pub enum Condition {
     Equation(Equation),
     Inequality(Inequality),
 } impl Condition {
-    pub fn standarized(self) -> (Self, Option<Variable>) {
+    pub fn into_standarized(self) -> (Self, Option<Variable>) {
         match self {
             Self::Equation(e) => (
                 Self::Equation(e), None
@@ -16,23 +16,36 @@ pub enum Condition {
             Self::Inequality(Inequality { left, sign:Sign::LE, right }) => {
                 let mut terms = left.terms;
                 let slack = new_slack();
-                terms.push((1, slack.clone()));
+                terms.push((1., slack.clone()));
 
                 (Self::Equation(equation(terms, right)), Some(slack))
             }
         }
     }
+
+    pub fn left(&self) -> &Expression {
+        match self {
+            Self::Equation(e)   => &e.left,
+            Self::Inequality(i) => &i.left,
+        }
+    }
+    pub fn right(&self) -> &Scalor {
+        match self {
+            Self::Equation(e)   => &e.right,
+            Self::Inequality(i) => &i.right,
+        }
+    }
 }
 
 pub struct Equation {
-    left:  Expression,
-    right: Scalor,
+    pub left:  Expression,
+    pub right: Scalor,
 }
 
 pub struct Inequality {
-    left:  Expression,
-    sign:  Sign,
-    right: Scalor,
+    pub left:  Expression,
+    pub sign:  Sign,
+    pub right: Scalor,
 }
 pub enum Sign {
     GE,

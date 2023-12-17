@@ -1,11 +1,10 @@
 use std::{hash::{DefaultHasher, Hasher}, sync::{OnceLock, Mutex}};
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Variable {
     Normal { id: usize },
     Slack  { id: usize },
-    Object,
 }
 
 pub fn var(literal: impl AsRef<str>) -> Variable {
