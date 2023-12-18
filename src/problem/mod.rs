@@ -1,71 +1,49 @@
-mod condition;
-
-use std::collections::HashSet;
-
-pub use condition::*;
-use crate::{Expression, expression::Variable};
+#![allow(non_snake_case)]
+use crate::components::{Polynomial, Scalor, Variable, Matrix};
 
 
-pub struct Problem {
-    pub(crate) optimize_type:      OptimizeType,
-    pub(crate) objective_function: Expression,
-    pub(crate) conditions:         Vec<Condition>,
-}
-#[derive(Debug, PartialEq)]
-pub(crate) enum OptimizeType {
-    Max,
-    Min,
+pub struct GeneralFormProblem {
+    objective_function: Polynomial,
+    condition:          GeneralFormCondition,
 }
 
-impl Problem {
-    pub fn max(objective_function: Expression) -> Self {
-        Self { optimize_type: OptimizeType::Max, objective_function, conditions: Vec::new() }
-    }
-    pub fn min(objective_function: Expression) -> Self {
-        Self { optimize_type: OptimizeType::Min, objective_function, conditions: Vec::new() }
-    }
-    pub fn st(mut self, condition: Condition) -> Self {
-        self.conditions.push(condition);
-        self
-    }
-
-    pub fn solve(self) {
-        todo!()
-    }
+/// `A x <= b`
+pub struct GeneralFormCondition {
+    A: Matrix<Scalor>,
+    x: Vec<Variable>,
+    b: Vec<Scalor>,
 }
 
-impl Problem {
-    pub(crate) fn into_standard_form(mut self) -> Self {
-        let mut conditions = Vec::with_capacity(self.conditions.len());
-        for cond in self.conditions {
-            let (standarized, slack) = cond.into_standarized();
-            conditions.push(standarized);
-            if let Some(slack) = slack {
-                conditions.push(Condition::Inequality(
-                    inequality(vec![(1., slack)], Sign::GE, 0.)
-                ))
-            }
-        }
+pub struct StandarndFormProblem {
+    pub objective_function: Polynomial,
+    pub condition:          StandardFormCondition,
+}
 
-        if matches!(&self.optimize_type, OptimizeType::Min) {
-            for (scalor, _) in &mut self.objective_function.terms {
-                *scalor *= -1.;
-            }
-            self.optimize_type = OptimizeType::Max;
-        }
+/// `A x = b`
+pub struct StandardFormCondition {
+    pub A: Matrix<Scalor>,
+    pub x: Vec<Variable>,
+    pub b: Vec<Scalor>,
+}
 
-        Self { conditions, ..self }
+
+impl GeneralFormProblem {
+    pub fn into_standard_form(self) -> StandarndFormProblem {
+        let GeneralFormProblem { objective_function, condition } = self;
+        StandarndFormProblem { objective_function, condition:condition.into_standard_form() }
     }
+}
+impl GeneralFormCondition {
+    pub fn into_standard_form(self) -> StandardFormCondition {
+        let GeneralFormCondition { A, x, b } = self;
 
-    pub(crate) fn all_variables(&self) -> Vec<Variable> {
-        let mut all_variables = HashSet::new();
-        for condition in &self.conditions {
-            for (_, var) in &condition.left().terms {
-                if !all_variables.contains(var) {
-                    all_variables.insert(var.clone());
-                }
-            }
+        let slack_variables = (1..=x.len()).into_iter()
+            .map(|i| Variable::Slack { name: format!("s{i}") }).collect::<Vec<Variable>>();
+
+        StandardFormCondition {
+            A: A.try_concat(Matrix::identity(b.len())).unwrap(/* `b.len()` equals to `A.column_size` */),
+            x: [x, slack_variables].concat(),
+            b
         }
-        all_variables.into_iter().collect()
     }
 }

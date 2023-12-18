@@ -1,67 +1,43 @@
 use std::collections::HashMap;
 
-use crate::expression::{Variable, Expression};
-use crate::problem::{Problem, OptimizeType, Condition, Inequality, Equation};
-use crate::{Scalor};
+use crate::{components::{Scalor, Variable, Polynomial}, problem::StandarndFormProblem};
 
 
-pub struct SimplexTable {
-    slack_rows:   Vec<SimplexRow>,
-    object_row:   SimplexObjectRow,
-    inequalities: Vec<Inequality>,
+pub struct Table {
+    objective_row: ObjectiveRow,
+    base_rows:     Vec<BaseRow>,
 }
 
-struct SimplexRow {
-    base:         Variable,
-    base_value:   Scalor,
-    coefficients: HashMap<Variable, Scalor>,
-    inc_limit:    Scalor,
-}
-struct SimplexObjectRow {
+struct ObjectiveRow {
     value:        Scalor,
     coefficients: HashMap<Variable, Scalor>,
 }
 
-impl SimplexTable {
-    pub(crate) fn from_problem(problem: Problem) -> Self {
-        /* assert that `problem` is pre-proccessed */
-        assert_eq!(problem.optimize_type, OptimizeType::Max);
+struct BaseRow {
+    base:         Variable,
+    value:        Scalor,
+    coefficients: HashMap<Variable, Scalor>,
+}
 
-        #[allow(non_snake_case)]
-        let ALL_VARIABLES = problem.all_variables();
 
-        let mut table = Self {
-            slack_rows:   Vec::new(),
-            inequalities: Vec::new(),
-            object_row:   SimplexObjectRow {
-                value:        0.,
-                coefficients: {
-                    let mut c = HashMap::new();
-                    for v in &ALL_VARIABLES {
-                        c.insert(
-                            v.clone(),
-                            problem.objective_function.terms.into_iter()
-                                .find(|(scalor, var)| var == v)
-                                .map_or(0., |(scalor, _)| scalor),
-                        );
-                    }
-                    c
-                }
-            },
+impl Table {
+    pub fn from_standard_form_problem(problem: StandarndFormProblem) -> Self {
+        let StandarndFormProblem { objective_function, condition } = problem;
+
+        let x = || condition.x.clone();
+
+        let objective_row = ObjectiveRow {
+            value: 0.,
+            coefficients: HashMap::from_iter(
+                x().into_iter()
+                    .map(|var| (
+                        var.clone(),
+                        objective_function.terms.iter()
+                            .find(|term| term.variable == var)
+                            .map_or(0., |term| term.coefficient)
+                    ))),
         };
-        for condition in problem.conditions {
-            match condition {
-                Condition::Inequality(i) => table.inequalities.push(i),
-                Condition::Equation(Equation { left, right }) => {
-                    let row = SimplexRow {
-                        base:         ,
-                        base_value:   ,
-                        coefficients: ,
-                        inc_limit:    ,
-                    };
-                }
-            }
-        }
-        table
+
+        TODO
     }
 }
