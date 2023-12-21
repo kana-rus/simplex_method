@@ -152,7 +152,7 @@ impl Table {
 
         /* Add multiple of pivot row to other rows so that their value at pivot column be 0 */
         for i in (0..pivot.row).chain((pivot.row + 1)..(self.coefficients.column_size)) {
-            let rate = self.coefficients[i][pivot.column] / pivot.value;
+            let rate = self.coefficients[i][pivot.column];
             let cofficients_pivot_row = self.coefficients[pivot.row].clone();
 
             self.bases[i].value -= self.bases[pivot.row].value * rate;
