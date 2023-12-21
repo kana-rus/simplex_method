@@ -1,5 +1,5 @@
-mod scalor;     pub use scalor::*;
-mod variable;   pub use variable::*;
-mod matrix;     pub use matrix::*;
-mod term;       pub use term::*;
-mod polynomial; pub use polynomial::*;
+pub mod scalor;
+pub mod variable;
+pub mod term;
+pub mod polynomial;
+pub mod matrix;

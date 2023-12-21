@@ -1,5 +1,6 @@
 #![allow(non_snake_case)]
-use crate::components::{Polynomial, Scalor, Variable, Matrix};
+
+use crate::components::{polynomial::Polynomial, matrix::Matrix, scalor::Scalor, variable::Variable};
 
 
 pub struct GeneralFormProblem {
@@ -28,16 +29,16 @@ pub struct StandardFormCondition {
 
 
 impl GeneralFormProblem {
-    pub fn into_standard_form(self) -> StandarndFormProblem {
+    pub(crate) fn into_standard_form(self) -> StandarndFormProblem {
         let GeneralFormProblem { objective_function, condition } = self;
         StandarndFormProblem { objective_function, condition:condition.into_standard_form() }
     }
 }
 impl GeneralFormCondition {
-    pub fn into_standard_form(self) -> StandardFormCondition {
+    pub(crate) fn into_standard_form(self) -> StandardFormCondition {
         let GeneralFormCondition { A, x, b } = self;
 
-        let slack_variables = (1..=x.len()).into_iter()
+        let slack_variables = (1..=b.len()).into_iter()
             .map(|i| Variable::Slack { name: format!("s{i}") }).collect::<Vec<Variable>>();
 
         StandardFormCondition {
@@ -45,5 +46,20 @@ impl GeneralFormCondition {
             x: [x, slack_variables].concat(),
             b
         }
+    }
+}
+
+impl GeneralFormProblem {
+    pub fn maximize(objective_function: impl Into<Polynomial>, condition: GeneralFormCondition) -> Self {
+        Self {
+            objective_function: objective_function.into(),
+            condition,
+        }
+    }
+}
+impl GeneralFormCondition {
+    /// `\forall i, Ax_i <= b_i`
+    pub fn each_le(A: Matrix<Scalor>, x: Vec<Variable>, b: Vec<impl Into<Scalor>>) -> Self {
+        Self { A, x, b:b.into_iter().map(Into::into).collect() }
     }
 }
