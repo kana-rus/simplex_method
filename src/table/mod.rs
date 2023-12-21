@@ -67,7 +67,7 @@ impl Table {
     }
 
     pub fn solve(mut self) -> Result<Solution, String> {
-        const UPDATE_LIMIT: usize = 2;
+        const UPDATE_LIMIT: usize = 5;
         let mut update_count = 0;
 
         #[cfg(test)] println!("{self:?}");
@@ -126,7 +126,7 @@ impl Table {
             .enumerate()
             .take_while(|(i, _)| *i < self.coefficients.column_size - 1)
             .map(|(i, c)| self.bases[i].value / c);
-        let (min_maxinc_row, min_maxinc) = max_increases
+        let (min_maxinc_row, _) = max_increases
             .enumerate()
             .fold((0, 0.), |(mut min_maxinc_row, mut min_maxinc), (i, maxinc)| {
                 if maxinc < min_maxinc {(min_maxinc_row, min_maxinc) = (i, maxinc)}
@@ -136,13 +136,16 @@ impl Table {
         Pivot {
             row:    min_maxinc_row,
             column: min_criterion_coloumn,
-            value:  min_maxinc,
+            value:  self.coefficients[min_maxinc_row][min_criterion_coloumn],
         }
     }
 
-    /// Update `coefficients` by pivot operation.
+    /// Update table by pivot operation.
+    /// 
+    /// **NOTE**：Here *table* is consist of coefficients and **the column of base variables' values**.
     fn update_coefficients(&mut self, pivot: Pivot) {
-        /* Divide all coefficients in pivot row by pivot value */
+        /* Divide all values in pivot row by pivot value */
+        self.bases[pivot.row].value /= pivot.value;
         for c in &mut self.coefficients[pivot.row] {
             *c /= pivot.value
         }
@@ -150,8 +153,11 @@ impl Table {
         /* Add multiple of pivot row to other rows so that their value at pivot column be 0 */
         for i in (0..pivot.row).chain((pivot.row + 1)..(self.coefficients.column_size)) {
             let rate = self.coefficients[i][pivot.column] / pivot.value;
-            for c in &mut self.coefficients[i] {
-                *c -= pivot.value * rate;
+            let cofficients_pivot_row = self.coefficients[pivot.row].clone();
+
+            self.bases[i].value -= self.bases[pivot.row].value * rate;
+            for (i, c) in self.coefficients[i].iter_mut().enumerate() {
+                *c -= cofficients_pivot_row[i] * rate;
             }
         }
     }

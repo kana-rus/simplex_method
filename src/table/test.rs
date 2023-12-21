@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 use std::collections::HashMap;
 use crate::{Problem, Condition, var, matrix, components::variable::{slack, Variable}, problem::Sign};
 use super::{Table, BaseVariable, Pivot, Solution};
@@ -51,7 +52,7 @@ use super::{Table, BaseVariable, Pivot, Solution};
         }
     });
 
-    let mut table = Table::from_problem(problem.into_standard_form());
+    let table = Table::from_problem(problem.into_standard_form());
 
     assert_eq!(table, Table {
         variables: vec![
@@ -76,14 +77,16 @@ use super::{Table, BaseVariable, Pivot, Solution};
     });
     assert_eq!(table.is_optimal(), false);
     assert_eq!(table.pivot(), Pivot {
-        
+        row:    0,
+        column: 1,
+        value:  5.,
     });
 
-    // assert_eq!(table.solve().unwrap(), Solution {
-    //     variables:     HashMap::from([
-    //         (var("x1"), 2.5),
-    //         (var("x2"), 3.),
-    //     ]),
-    //     optimal_value: 25.,
-    // });
+    assert_eq!(table.solve().unwrap(), Solution {
+        variables:     HashMap::from([
+            (var("x1"), 2.5),
+            (var("x2"), 3.),
+        ]),
+        optimal_value: 25.,
+    });
 }
