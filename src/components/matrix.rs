@@ -99,6 +99,25 @@ impl Matrix<Scalor> {
 
 
 const _: () = {
+    impl<T: std::fmt::Debug> std::fmt::Debug for Matrix<T> {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str(&format!("{:?}", self.rows))
+        }
+    }
+    impl<T: PartialEq> PartialEq for Matrix<T> {
+        fn eq(&self, other: &Self) -> bool {
+            let (column_size, row_size) = (self.column_size, self.row_size);
+
+            if other.column_size != column_size {return false}
+            if other.row_size != row_size {return false}
+            for i in 0..column_size {
+                if &self.rows[i] != &other.rows[i] {return false}
+            }
+
+            true
+        }
+    }
+
     impl<T> std::ops::Index<usize> for Matrix<T> {
         type Output = Vec<T>;
         fn index(&self, i: usize) -> &Self::Output {

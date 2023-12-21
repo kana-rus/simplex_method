@@ -37,8 +37,8 @@ pub use components::{
     matrix::Matrix,
 };
 pub use problem::{
-    GeneralFormCondition as Condition,
-    GeneralFormProblem as Problem,
+    Condition,
+    Problem,
 };
 pub use table::{
     Solution,
@@ -46,7 +46,7 @@ pub use table::{
 
 impl Problem {
     pub fn solve(self) -> Result<Solution, String> {
-        table::Table::from_standard_form_problem(
+        table::Table::from_problem(
             self.into_standard_form()
         ).solve()
     }

@@ -1,16 +1,18 @@
 #[cfg(test)] mod test;
 
 use std::collections::HashMap;
-use crate::problem::StandarndFormProblem;
+use crate::problem::Problem;
 use crate::components::{variable::Variable, scalor::Scalor, matrix::Matrix};
 
 
+#[derive(PartialEq)]
 pub struct Table {
     variables:    Vec<Variable>,      // This's index is just the column number of `coefficients`
     bases:        Vec<BaseVariable>,  // This's index is just the row number of `coefficients`
     coefficients: Matrix<Scalor>,
 }
 
+#[derive(PartialEq)]
 struct BaseVariable {
     variable: Variable,
     value:    Scalor,
@@ -29,8 +31,8 @@ pub struct Solution {
 }
 
 impl Table {
-    pub fn from_standard_form_problem(problem: StandarndFormProblem) -> Self {
-        let StandarndFormProblem { objective_function, condition } = problem;
+    pub fn from_problem(problem: Problem) -> Self {
+        let Problem { objective_function, condition } = problem.into_standard_form();
 
         let variables = condition.x;
 
@@ -183,6 +185,8 @@ const _: () = {
             let column_widths   = variable_maxwidths.zip(coefficient_column_maxwidths)
                 .map(|(v, c)| usize::max(v, c))
                 .collect::<Vec<_>>();
+
+            f.write_str("\n")?;
 
             f.write_str(&" ".repeat(base_info_width))?;
             f.write_str(" |  ")?;

@@ -2,6 +2,7 @@ use std::ops::{Add, AddAssign, Sub, SubAssign};
 use super::term::Term;
 
 
+#[derive(Debug, PartialEq)]
 pub struct Polynomial {
     pub terms: Vec<Term>,
 }
