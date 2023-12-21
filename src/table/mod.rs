@@ -18,6 +18,7 @@ struct BaseVariable {
     value:    Scalor,
 }
 
+#[derive(Debug, PartialEq)]
 struct Pivot {
     row:    usize,
     column: usize,
@@ -39,9 +40,14 @@ impl Table {
         let bases = {
             let slack_variables = variables.clone().into_iter()
                 .skip_while(Variable::is_normal);
-            slack_variables.zip(condition.b)
+            let mut bases = slack_variables.zip(condition.b)
                 .map(|(variable, value)| BaseVariable { variable, value })
-                .collect()
+                .collect::<Vec<_>>();
+            bases.push(BaseVariable {
+                variable: Variable::Object,
+                value:    0.,
+            });
+            bases
         };
 
         let coefficients = {
@@ -80,8 +86,8 @@ impl Table {
         }
 
         Ok(Solution {
-            optimal_value:   self.object_value(),
-            variables: HashMap::from_iter(
+            optimal_value: self.object_value(),
+            variables:     HashMap::from_iter(
                 self.bases.into_iter()
                     .filter_map(|BaseVariable { variable, value }| variable.is_normal().then(|| (variable, value)))
             ),
@@ -118,6 +124,7 @@ impl Table {
             });
         let max_increases = self.coefficients.column_iter(min_criterion_coloumn).unwrap()
             .enumerate()
+            .take_while(|(i, _)| *i < self.coefficients.column_size - 1)
             .map(|(i, c)| self.bases[i].value / c);
         let (min_maxinc_row, min_maxinc) = max_increases
             .enumerate()

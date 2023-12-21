@@ -2,6 +2,7 @@
 pub enum Variable {
     Normal {name: String},
     Slack  {id:   usize},
+    Object,
 } impl Variable {
     pub fn is_normal(&self) -> bool {
         matches!(self, Variable::Normal {..})
@@ -27,6 +28,7 @@ const _: () = {
             match self {
                 Self::Normal { name } => f.write_str(name),
                 Self::Slack  {  id  } => f.write_str(&format!("slack#{id}")),
+                Self::Object          => f.write_str("#z"),
             }
         }
     }

@@ -1,7 +1,6 @@
 use std::collections::HashMap;
-use crate::{Problem, Condition, Solution, var, matrix, components::variable::slack, problem::Sign};
-
-use super::{Table, BaseVariable};
+use crate::{Problem, Condition, var, matrix, components::variable::{slack, Variable}, problem::Sign};
+use super::{Table, BaseVariable, Pivot, Solution};
 
 
 #[test] fn test_simplex_method() {
@@ -10,7 +9,7 @@ use super::{Table, BaseVariable};
             matrix! {
                 2, 5
                 6, 4
-                3, 2
+                3, 1
             },
             vec![
                 var("x1"),
@@ -32,7 +31,7 @@ use super::{Table, BaseVariable};
             A: matrix! {
                 2, 5, 1, 0, 0
                 6, 4, 0, 1, 0
-                3, 2, 0, 0, 1
+                3, 1, 0, 0, 1
             },
             x: vec![
                 var("x1"),
@@ -66,16 +65,21 @@ use super::{Table, BaseVariable};
             BaseVariable { variable:slack(1), value:20. },
             BaseVariable { variable:slack(2), value:27. },
             BaseVariable { variable:slack(3), value:12. },
+            BaseVariable { variable:Variable::Object, value:0. },
         ],
         coefficients: matrix! {
              2,  5, 1, 0, 0
              6,  4, 0, 1, 0
-             3,  2, 0, 0, 1
+             3,  1, 0, 0, 1
             -4, -5, 0, 0, 0
         },
     });
+    assert_eq!(table.is_optimal(), false);
+    assert_eq!(table.pivot(), Pivot {
+        
+    });
 
-    // assert_eq!(problem.solve().unwrap(), Solution {
+    // assert_eq!(table.solve().unwrap(), Solution {
     //     variables:     HashMap::from([
     //         (var("x1"), 2.5),
     //         (var("x2"), 3.),

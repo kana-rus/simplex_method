@@ -28,7 +28,7 @@ impl<T> Matrix<T> {
     pub fn push_row(&mut self, row: Vec<T>) -> Result<(), String> {
         let row_size = row.len();
         (self.row_size == row_size)
-            .then(|| self.rows.push(row))
+            .then(|| {self.rows.push(row); self.column_size += 1})
             .ok_or_else(|| format!("Row size is {} but new row's size is {}", self.row_size, row_size))
     }
 }
