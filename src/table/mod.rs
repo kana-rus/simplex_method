@@ -74,6 +74,8 @@ impl Table {
 
         while !self.is_optimal() {
             let p = self.pivot();
+            #[cfg(test)] println!("\n{p:?}");
+
             self.bases[p.row].variable = self.variables[p.column].clone();
             self.update_coefficients(p);
 
@@ -118,20 +120,18 @@ impl Table {
     fn pivot(&self) -> Pivot {
         let (min_criterion_coloumn, _) = self.criterions().iter()
             .enumerate()
-            .fold((0, 0.), |(mut min_criterion_coloumn, mut min), (i, c)| {
-                if c < &min {(min_criterion_coloumn, min) = (i, *c)}
-                (min_criterion_coloumn, min)
-            });
+            .reduce(|(min_criterion_coloumn, min), (i, c)| {
+                if c < &min {(i, c)} else {(min_criterion_coloumn, min)}
+            }).unwrap();
         let max_increases = self.coefficients.column_iter(min_criterion_coloumn).unwrap()
             .enumerate()
             .take_while(|(i, _)| *i < self.coefficients.column_size - 1)
             .map(|(i, c)| self.bases[i].value / c);
         let (min_maxinc_row, _) = max_increases
             .enumerate()
-            .fold((0, 0.), |(mut min_maxinc_row, mut min_maxinc), (i, maxinc)| {
-                if maxinc < min_maxinc {(min_maxinc_row, min_maxinc) = (i, maxinc)}
-                (min_maxinc_row, min_maxinc)
-            });
+            .reduce(|(min_maxinc_row, min_maxinc), (i, maxinc)|
+                if maxinc < min_maxinc {(i, maxinc)} else {(min_maxinc_row, min_maxinc)}
+            ).unwrap();
         
         Pivot {
             row:    min_maxinc_row,
