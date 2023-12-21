@@ -127,6 +127,7 @@ impl Table {
             .map(|(i, c)| self.bases[i].value / c);
         let (min_maxinc_row, _) = max_increases
             .enumerate()
+            .filter(|(_, maxinc)| *maxinc >= 0.)
             .reduce(|(min_maxinc_row, min_maxinc), (i, maxinc)|
                 if maxinc < min_maxinc {(i, maxinc)} else {(min_maxinc_row, min_maxinc)}
             ).unwrap();
