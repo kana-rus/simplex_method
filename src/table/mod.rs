@@ -74,8 +74,6 @@ impl Table {
 
         while !self.is_optimal() {
             let p = self.pivot();
-            #[cfg(test)] println!("\n{p:?}");
-
             self.bases[p.row].variable = self.variables[p.column].clone();
             self.update_coefficients(p);
 
@@ -202,7 +200,7 @@ const _: () = {
             f.write_str("\n")?;
 
             f.write_str(&" ".repeat(base_info_width))?;
-            f.write_str(" |  ")?;
+            f.write_str("  ")?;
             for (i, var) in self.variables.iter().enumerate() {
                 let fmt   = format!("{var:?}");
                 let width = fmt.len();
@@ -231,7 +229,7 @@ const _: () = {
                 };
                 f.write_str(&base_fmt)?;
 
-                f.write_str(" |  ")?;
+                f.write_str("  ")?;
 
                 for (i, c) in coefficients.iter().enumerate() {
                     let fmt = format!("{c:?}");

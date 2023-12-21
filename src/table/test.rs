@@ -90,3 +90,68 @@ use super::{Table, BaseVariable, Pivot, Solution};
         optimal_value: 25.,
     });
 }
+
+#[test] fn test_various_problems() {
+    assert_eq!(
+        Problem::maximize(4*var("x1") + 5*var("x2"),
+            Condition::each_le(
+                matrix! {
+                    2, 5
+                    6, 4
+                    3, 1
+                },
+                vec![
+                    var("x1"),
+                    var("x2"),
+                ],
+
+                /* less than or equals to */
+
+                vec![
+                    20,
+                    27,
+                    12,
+                ]
+            )
+        ).solve().unwrap(),
+        Solution {
+            variables:     HashMap::from([
+                (var("x1"), 2.5),
+                (var("x2"), 3.),
+            ]),
+            optimal_value: 25.,
+        }
+    );
+
+    assert_eq!(
+        Problem::maximize(20*var("x1") + 30*var("x2"),
+            Condition::each_le(
+                matrix! {
+                    1, 2
+                    3, 4
+                    3, 1
+                },
+                vec![
+                    var("x1"),
+                    var("x2"),
+                ],
+
+                /* less than or equals to */
+
+                vec![
+                    800,
+                    1800,
+                    1500,
+                ]
+            )
+        ).solve().unwrap(),
+        Solution {
+            variables:     HashMap::from([
+                (var("x1"), 201.),
+                (var("x2"), 300.),
+            ]),
+            optimal_value: 13000.,
+        }
+    );
+
+}
