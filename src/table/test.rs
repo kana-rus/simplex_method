@@ -147,7 +147,7 @@ use super::{Table, BaseVariable, Pivot, Solution};
         ).solve().unwrap(),
         Solution {
             variables:     HashMap::from([
-                (var("x1"), 201.),
+                (var("x1"), 200.),
                 (var("x2"), 300.),
             ]),
             optimal_value: 13000.,
